@@ -93,6 +93,10 @@ var gesture = new smartGesture({el: document.querySelector('#target'), ...});
 
 - `eventType` 响应事件的类型。类型为`String`,可选值`touch | mouse`,当指定为`touch`时将捕获`touch`相关的事件,简单的说如果用于移动端请将参数设置为`touch`。(default: `mouse`)
 
+- `onMove: function(directionList)` 手势移动时调用,
+
+    - `directionList`: 普通手势的识别结果,数组。
+
 - `onSwipe: function(directionList)` 手势结束时调用,
 
     - `directionList`: 普通手势的识别结果,数组。
