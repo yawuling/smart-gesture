@@ -3,11 +3,12 @@ import * as gesture from './dollarOne/gestures';
 
 const DO = new DollarRecognizer();
 const emptyFunc = () => {};
-const svgPathId = 'elemefe_still_hiring_you_can_send_email_to_(yong.xiang@ele.me)';
+const svgPathId = 'smart-gesture-svg';
 class Canvas {
   constructor(options = {}) {
     this.options = {
       el: document.body,
+      onMove: emptyFunc,
       onSwipe: emptyFunc,
       onGesture: emptyFunc,
       gestures: gesture,
@@ -19,7 +20,7 @@ class Canvas {
       activeColor: 'rgba(0, 0, 0, .05)',
       eventType: 'mouse',
       position: 'absolute',
-      zIndex: 1,
+      zIndex: 999,
       ...options,
     };
     this.enable = true;
@@ -37,6 +38,8 @@ class Canvas {
     this._initUnistrokes(options.gestures || gesture);
 
     this._mouseDelayTimer = null;
+    this._hasTouchStart = false;
+    this._startPoint = null;
 
     this._moveStart = this._moveStart.bind(this);
     this._move = this._move.bind(this);
@@ -64,11 +67,10 @@ class Canvas {
     this.svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     this.path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     this.path.id = svgPathId;
-    this.svg.setAttribute('style', `position: ${this.options.position}; top: 0; left: 0; background: ${this.options.activeColor}`);
+    this.svg.setAttribute('style', `position: ${this.options.position}; top: 0; left: 0; background: ${this.options.activeColor}; z-index: ${this.options.zIndex}`);
     this.svg.setAttribute('width', `${this.options.el.offsetWidth}`);
     this.svg.setAttribute('height', `${this.options.el.offsetHeight}`);
     this.svg.setAttribute('fill', 'none');
-    this.svg.setAttribute('zIndex', `${this.options.zIndex}`);
 
     this.points = [];
     // this.startPos = startPoint;
@@ -130,31 +132,61 @@ class Canvas {
   _moveStart() {
     if (!this.enable) return;
 
-    let startPoint;
     if (this.options.eventType === 'touch') {
-      startPoint = this._handleTouchStart();
+      this._startPoint = this._handleTouchStart();
     } else {
       if (this.options.triggerMouseKey === 'left') {
         if (event.button !== 0) return;
       } else {
         if (event.button !== 2) return;
       }
-      startPoint = this._handleMouseStart();
+      this._startPoint = this._handleMouseStart();
     }
 
-    this._mouseDelayTimer = setTimeout(() => {
-      if (this.options.enablePath) {
-        this._addPath(startPoint);
-      }
-
-      this.isMove = true;
-    }, this.options.timeDelay);
+    if (this.options.triggerMouseKey !== 'right' || this.options.eventType === 'touch') {
+      this._mouseDelayTimer = setTimeout(() => {
+        if (this.options.enablePath) {
+          this._addPath(this._startPoint);
+        }
+  
+        this.isMove = true;
+      }, this.options.timeDelay);
+    }
+    this._hasTouchStart = true;
   }
 
   _move() {
-    if (!this.isMove) {
-      clearTimeout(this._mouseDelayTimer);
+    if (!this._hasTouchStart) {
       return;
+    }
+
+    if (this.options.triggerMouseKey !== 'right' || this.options.eventType === 'touch') {
+      if (!this.isMove) {
+        clearTimeout(this._mouseDelayTimer);
+        return;
+      }
+    } else {
+      const pageX = event.pageX;
+      const pageY = event.pageY;
+      const offset = this._calcOffsetFromRoot(this.options.el);
+
+      const x = pageX - offset.left;
+      const y = pageY - offset.top;
+      const dx = Math.abs(x - this._startPoint.x);
+      const dy = Math.abs(y - this._startPoint.y);
+
+      if (dx <= 5 && dy <= 5) {
+        return;
+      }
+
+      if (this.options.enablePath && !this.isMove) {
+        this._addPath(this._startPoint);
+      }
+
+      this.isMove = true;
+      if (this.directionList.length > 0) {
+        this.options.onMove(this.directionList);
+      }
     }
 
     event.preventDefault();
@@ -162,6 +194,9 @@ class Canvas {
   }
 
   _moveEnd() {
+    this._startPoint = null;
+    this._hasTouchStart = false;
+
     if (!this.isMove) {
       clearTimeout(this._mouseDelayTimer);
       return;
@@ -178,14 +213,16 @@ class Canvas {
     if (this.options.enablePath) {
       this.options.el.removeChild(this.svg);
     }
-    this.isMove = false;
+    setTimeout(() => {
+      this.isMove = false;
+    }, 0);
     this.endPos = null;
     this.directionList = [];
     this.points = [];
   }
 
   _contextmenu() {
-    if (this.enable && this.options.triggerMouseKey !== 'left') {
+    if (/Mac OS X/i.test(navigator.userAgent) || this.isMove && this.enable && this.options.triggerMouseKey !== 'left') {
       event.preventDefault();
     }
   }

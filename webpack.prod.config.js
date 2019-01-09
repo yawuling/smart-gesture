@@ -12,7 +12,7 @@ module.exports = [{
     path: path.resolve(__dirname, './dist/min'),
     filename: '[name].min.js',
     publicPath: '/',
-    libraryTarget: 'umd',
+    libraryTarget: 'window',
     library: 'smartGesture',
     umdNamedDefine: true
   },

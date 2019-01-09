@@ -8,7 +8,7 @@ const options = {
   el: document.getElementById('test'),
   enablePath: true,
   timeDelay: 100,
-  triggerMouseKey: 'left',
+  triggerMouseKey: 'right',
   onSwipe: (list) => {
     document.getElementById('result0').innerHTML = list.join('');
     console.log(list);
