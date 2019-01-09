@@ -19,7 +19,7 @@ class Canvas {
       triggerMouseKey: 'right',
       activeColor: 'rgba(0, 0, 0, .05)',
       eventType: 'mouse',
-      position: 'absolute',
+      position: 'fixed',
       zIndex: 999,
       ...options,
     };
@@ -62,6 +62,7 @@ class Canvas {
     if (this.options.el) {
       this.$listenerEl = this.options.el
       this.$el = this.options.el
+      this.options.position = 'absolute'
     }
 
     this.$listenerEl.addEventListener(this.pointerStart, this._moveStart);
@@ -75,8 +76,8 @@ class Canvas {
     this.svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     this.path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     this.path.id = svgPathId;
-    let svgWidth = window.screen.width
-    let svgHeight = window.screen.height
+    let svgWidth = window.innerWidth
+    let svgHeight = window.innerHeight
 
     if (this.options.el) {
       svgWidth = this.options.el.offsetWidth
