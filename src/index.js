@@ -133,17 +133,21 @@ class Canvas {
 
   _handleMouseStart() {
     const offset = this.options.el ? this._calcOffsetFromRoot(this.options.el) : { left: 0, top: 0 };
+    const pageX = this.options.el ? event.pageX : event.clientX;
+    const pageY = this.options.el ? event.pageY : event.clientY;
     return {
-      x: event.pageX - offset.left,
-      y: event.pageY - offset.top,
+      x: pageX - offset.left,
+      y: pageY - offset.top,
     };
   }
 
   _handleTouchStart() {
     const offset = this.options.el ? this._calcOffsetFromRoot(this.options.el) : { left: 0, top: 0 };
+    const pageX = this.options.el ? event.touches[0].pageX : event.clientX;
+    const pageY = this.options.el ? event.touches[0].pageY : event.clientY;
     return {
-      x: event.touches[0].pageX - offset.left,
-      y: event.touches[0].pageY - offset.top,
+      x: pageX - offset.left,
+      y: pageY - offset.top,
     };
   }
 
@@ -184,8 +188,8 @@ class Canvas {
         return;
       }
     } else {
-      const pageX = event.pageX;
-      const pageY = event.pageY;
+      const pageX = this.options.el ? event.pageX : event.clientX;
+      const pageY = this.options.el ? event.pageY : event.clientY;
       const offset = this.options.el ? this._calcOffsetFromRoot(this.options.el) : { left: 0, top: 0 };
 
       const x = pageX - offset.left;
@@ -246,8 +250,8 @@ class Canvas {
   }
 
   _progressSwipe(e) {
-    const pageX = this.options.eventType === 'touch' ? e.changedTouches[0].pageX : e.pageX;
-    const pageY = this.options.eventType === 'touch' ? e.changedTouches[0].pageY : e.pageY;
+    const pageX = this.options.el ? (this.options.eventType === 'touch' ? e.changedTouches[0].pageX : e.pageX) : e.clientX;
+    const pageY = this.options.el ? (this.options.eventType === 'touch' ? e.changedTouches[0].pageY : e.pageY) : e.clientY;
     const offset = this.options.el ? this._calcOffsetFromRoot(this.options.el) : { left: 0, top: 0 };
     if (!this.endPos) {
       this.endPos = {
