@@ -7,7 +7,7 @@ const svgPathId = 'smart-gesture-svg';
 class Canvas {
   constructor(options = {}) {
     this.options = {
-      el: document.body,
+      el: '',
       onMove: emptyFunc,
       onSwipe: emptyFunc,
       onGesture: emptyFunc,
@@ -56,20 +56,36 @@ class Canvas {
       this.pointerUp = 'touchend';
       this.pointerLeave = 'touchcancel';
     }
-    this.options.el.addEventListener(this.pointerStart, this._moveStart);
-    this.options.el.addEventListener(this.pointerMove, this._move);
-    this.options.el.addEventListener(this.pointerUp, this._moveEnd);
-    this.options.el.addEventListener(this.pointerLeave, this._moveEnd);
-    this.options.el.addEventListener('contextmenu', this._contextmenu);
+
+    this.$listenerEl = window
+    this.$el = document.body
+    if (this.options.el) {
+      this.$listenerEl = this.options.el
+      this.$el = this.options.el
+    }
+
+    this.$listenerEl.addEventListener(this.pointerStart, this._moveStart);
+    this.$listenerEl.addEventListener(this.pointerMove, this._move);
+    this.$listenerEl.addEventListener(this.pointerUp, this._moveEnd);
+    this.$listenerEl.addEventListener(this.pointerLeave, this._moveEnd);
+    this.$listenerEl.addEventListener('contextmenu', this._contextmenu);
   }
 
   _addPath(startPoint) {
     this.svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     this.path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     this.path.id = svgPathId;
+    let svgWidth = window.screen.width
+    let svgHeight = window.screen.height
+
+    if (this.options.el) {
+      svgWidth = this.options.el.offsetWidth
+      svgHeight = this.options.el.offsetHeight
+    }
+
     this.svg.setAttribute('style', `position: ${this.options.position}; top: 0; left: 0; background: ${this.options.activeColor}; z-index: ${this.options.zIndex}`);
-    this.svg.setAttribute('width', `${this.options.el.offsetWidth}`);
-    this.svg.setAttribute('height', `${this.options.el.offsetHeight}`);
+    this.svg.setAttribute('width', `${svgWidth}`);
+    this.svg.setAttribute('height', `${svgHeight}`);
     this.svg.setAttribute('fill', 'none');
 
     this.points = [];
@@ -79,7 +95,8 @@ class Canvas {
     this.path.setAttribute('d', `M ${startPoint.x} ${startPoint.y}`);
 
     this.svg.appendChild(this.path);
-    this.options.el.appendChild(this.svg);
+    
+    this.$el.appendChild(this.svg);
   }
 
   _initUnistrokes(gestures) {
@@ -114,7 +131,7 @@ class Canvas {
   }
 
   _handleMouseStart() {
-    const offset = this._calcOffsetFromRoot(this.options.el);
+    const offset = this.options.el ? this._calcOffsetFromRoot(this.options.el) : { left: 0, top: 0 };
     return {
       x: event.pageX - offset.left,
       y: event.pageY - offset.top,
@@ -122,7 +139,7 @@ class Canvas {
   }
 
   _handleTouchStart() {
-    const offset = this._calcOffsetFromRoot(this.options.el);
+    const offset = this.options.el ? this._calcOffsetFromRoot(this.options.el) : { left: 0, top: 0 };
     return {
       x: event.touches[0].pageX - offset.left,
       y: event.touches[0].pageY - offset.top,
@@ -168,7 +185,7 @@ class Canvas {
     } else {
       const pageX = event.pageX;
       const pageY = event.pageY;
-      const offset = this._calcOffsetFromRoot(this.options.el);
+      const offset = this.options.el ? this._calcOffsetFromRoot(this.options.el) : { left: 0, top: 0 };
 
       const x = pageX - offset.left;
       const y = pageY - offset.top;
@@ -211,7 +228,7 @@ class Canvas {
     }
 
     if (this.options.enablePath) {
-      this.options.el.removeChild(this.svg);
+      this.$el.removeChild(this.svg);
     }
     setTimeout(() => {
       this.isMove = false;
@@ -230,7 +247,7 @@ class Canvas {
   _progressSwipe(e) {
     const pageX = this.options.eventType === 'touch' ? e.changedTouches[0].pageX : e.pageX;
     const pageY = this.options.eventType === 'touch' ? e.changedTouches[0].pageY : e.pageY;
-    const offset = this._calcOffsetFromRoot(this.options.el);
+    const offset = this.options.el ? this._calcOffsetFromRoot(this.options.el) : { left: 0, top: 0 };
     if (!this.endPos) {
       this.endPos = {
         x: pageX - offset.left,
@@ -297,11 +314,11 @@ class Canvas {
   }
 
   destroy() {
-    this.options.el.removeEventListener(this.pointerStart, this._moveStart);
-    this.options.el.removeEventListener(this.pointerMove, this._move);
-    this.options.el.removeEventListener(this.pointerUp, this._moveEnd);
-    this.options.el.removeEventListener(this.pointerLeave, this._moveEnd);
-    this.options.el.removeEventListener('contextmenu', this._contextmenu);
+    this.$listenerEl.removeEventListener(this.pointerStart, this._moveStart);
+    this.$listenerEl.removeEventListener(this.pointerMove, this._move);
+    this.$listenerEl.removeEventListener(this.pointerUp, this._moveEnd);
+    this.$listenerEl.removeEventListener(this.pointerLeave, this._moveEnd);
+    this.$listenerEl.removeEventListener('contextmenu', this._contextmenu);
   }
 
   refresh(options = {}) {

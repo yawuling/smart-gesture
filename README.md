@@ -75,7 +75,7 @@ var gesture = new smartGesture({el: document.querySelector('#target'), ...});
 可配置的参数如下:
 
 - `el` 应用手势识别的元素,类型为`DOMElement`。需要注意的是,由于用于显示鼠标轨迹的svg的`position`是`absolute`,
-所以为了保证鼠标轨迹的位置正常,建议对该元素设置`position: relative`。(default: `body`)
+所以为了保证鼠标轨迹的位置正常,建议对该元素设置`position: relative`。(默认监听window事件，挂载在body上面)
 
 - `enablePath` 是否显示鼠标轨迹,类型为`Boolean`。(default: `true`)
 

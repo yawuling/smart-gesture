@@ -1,11 +1,9 @@
 import smartGesture from '../src/index.js';
 import 'normalize.css';
-import '../src/css/main.scss';
 
 let lastPoints = [];
 
 const options = {
-  el: document.getElementById('test'),
   enablePath: true,
   timeDelay: 100,
   triggerMouseKey: 'right',
