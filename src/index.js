@@ -34,7 +34,7 @@ class Canvas {
     this.Unistrokes = [];
 
     this.path = document.getElementById(svgPathId);
-
+    
     this._initUnistrokes(options.gestures || gesture);
 
     this._mouseDelayTimer = null;
@@ -294,7 +294,7 @@ class Canvas {
 
   addGesture(ges = {}) {
     const { name, points } = ges;
-    const safeName = name.trim();
+    const safeName = name && name.trim();
     const msgMap = {
       'EMPTY_NAME':'Invalid Gesture Name. `addGesture` failed.',
       'EMPTY_POINT':'Invalid Points. `addGesture` failed.'
